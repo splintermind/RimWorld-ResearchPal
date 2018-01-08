@@ -35,9 +35,16 @@ namespace ResearchPal
             public static readonly string ShowFilteredLinks = "ResearchPal.ShowFilteredLinks".Translate ();
             public static readonly string ShowFilteredLinksTip = "ResearchPal.ShowFilteredLinksTip".Translate ();
 
+            public static readonly string GroupingDefault = "ResearchPal.GroupingDefault".Translate();
+            public static readonly string GroupingTabStrict = "ResearchPal.GroupingTabStrict".Translate();
+            public static readonly string GroupingTabRelaxed = "ResearchPal.GroupingTabRelaxed".Translate();
+            public static readonly string GroupingPrereq = "ResearchPal.GroupingPrereq".Translate();
+
             public static readonly string FilterTitleResearch = "FilterTitleResearch".Translate ();
             public static readonly string FilterTitleUnlocks = "FilterTitleUnlocks".Translate ();
             public static readonly string FilterTitleTechLevel = "FilterTitleTechLevel".Translate ();
+
+            public static readonly string DefaultResearchFamily = "DefaultResearchGroup".Translate ();
 
             public static string ResearchFinished(string label)
             {

@@ -18,6 +18,15 @@ namespace ResearchPal
         public static bool   showFilteredLinks  = false;
         public static bool   debugResearch      = false;
 
+        public enum grpStrategyType
+        {
+            DEFAULT,
+            TABS_STRICT,
+            TABS_RELAXED,
+            PREREQUISITES
+        }
+        public static grpStrategyType GroupingStrategy = grpStrategyType.DEFAULT;
+
         #endregion tuning parameters
 
         #region UI elements
@@ -51,10 +60,25 @@ namespace ResearchPal
             list.CheckboxLabeled (ResourceBank.String.ShowFilteredLinks, ref showFilteredLinks,
                                   ResourceBank.String.ShowFilteredLinksTip);
 
+            list.GapLine();
+            list.Label("Grouping Strategy");
+            if (list.RadioButton(ResourceBank.String.GroupingDefault, GroupingStrategy == grpStrategyType.DEFAULT))
+                GroupingStrategy = grpStrategyType.DEFAULT;
+
+            if (list.RadioButton(ResourceBank.String.GroupingTabStrict, GroupingStrategy == grpStrategyType.TABS_STRICT))
+                GroupingStrategy = grpStrategyType.TABS_STRICT;
+
+            if (list.RadioButton(ResourceBank.String.GroupingTabRelaxed, GroupingStrategy == grpStrategyType.TABS_RELAXED))
+                GroupingStrategy = grpStrategyType.TABS_RELAXED;
+
+            if (list.RadioButton(ResourceBank.String.GroupingPrereq, GroupingStrategy == grpStrategyType.PREREQUISITES))
+                GroupingStrategy = grpStrategyType.PREREQUISITES;
+
+            list.GapLine();
             list.Label(ResourceBank.String.FilterOpacityDesc(0.2f, (float)Math.Round(FilterNonMatchAlpha, 2)));
             FilterNonMatchAlpha = (float)Math.Round(list.Slider(FilterNonMatchAlpha, 0, 1), 2);
 
-            list.End ();
+            list.End();
         }
 
         public override void ExposeData ()
@@ -66,6 +90,8 @@ namespace ResearchPal
             Scribe_Values.Look (ref showFilteredLinks, "ShowFilteredLinks", false);
             Scribe_Values.Look (ref debugResearch, "DebugResearch", false);
             Scribe_Values.Look (ref FilterNonMatchAlpha, "FilterNonMatchAlpha", 0.2f, false);
+            Scribe_Values.Look<grpStrategyType> (ref GroupingStrategy, "GroupingStrategy", grpStrategyType.DEFAULT, true);
         }
+
     }
 }

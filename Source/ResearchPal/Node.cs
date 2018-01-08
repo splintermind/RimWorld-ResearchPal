@@ -56,18 +56,6 @@ namespace ResearchPal
         {
             Research = research;
 
-            // get the Genus, this is the research family name, and will be used to group research together.
-            // First see if we have a ":" in the name
-            List<string> parts = research.LabelCap.Split (":".ToCharArray ()).ToList ();
-            if (parts.Count > 1) {
-                Genus = parts.First ();
-            } else // otherwise, strip the last word (intended to catch 1,2,3/ I,II,III,IV suffixes)
-              {
-                parts = research.LabelCap.Split (" ".ToCharArray ()).ToList ();
-                parts.Remove (parts.Last ());
-                Genus = string.Join (" ", parts.ToArray ());
-            }
-
             Parents = new List<Node>();
             Children = new List<Node>();
         }
@@ -205,6 +193,34 @@ namespace ResearchPal
 
         #region Methods
 
+        public void ConfigGrouping()
+        {
+            if (Settings.GroupingStrategy == Settings.grpStrategyType.DEFAULT)
+            {
+                // get the Genus, this is the research family name, and will be used to group research together.
+                // First see if we have a ":" in the name
+                List<string> parts = Research.LabelCap.Split(":".ToCharArray()).ToList();
+                if (parts.Count > 1)
+                {
+                    Genus = parts.First();
+                }
+                else // otherwise, strip the last word (intended to catch 1,2,3/ I,II,III,IV suffixes)
+                {
+                    parts = Research.LabelCap.Split(" ".ToCharArray()).ToList();
+                    parts.Remove(parts.Last());
+                    Genus = string.Join(" ", parts.ToArray());
+                }
+            }
+            else if (Settings.GroupingStrategy == Settings.grpStrategyType.PREREQUISITES)
+            {
+
+                Genus = GetEarliestPrerequisite().Research.defName;
+            } else
+            {
+                Genus = Research.tab.defName;
+            }
+        }
+
         /// <summary>
         /// Determine the closest tree by moving along parents and then children until a tree has been found. Returns first tree encountered, or NULL.
         /// </summary>
@@ -251,6 +267,18 @@ namespace ResearchPal
 
             // finally, if nothing stuck, return null
             return null;
+        }
+
+        public Node GetEarliestPrerequisite()
+        {
+            if (Parents.Count < 1)
+            {
+                return this;
+            }
+            else
+            {
+                return Parents.OrderBy(node => node.Depth).First().GetEarliestPrerequisite();
+            }
         }
 
         /// <summary>
@@ -392,10 +420,6 @@ namespace ResearchPal
             Text.WordWrap = true;
             Text.Font = _largeLabel ? GameFont.Tiny : GameFont.Small;
             if (Settings.debugResearch && Prefs.DevMode)
-            {
-                Widgets.Label(LabelRect, Research.LabelCap + " (" + Depth + ", " + Genus + ", " + Family + "):");
-            }
-            else
             {
                 Widgets.Label(LabelRect, Research.LabelCap);
             }
@@ -697,6 +721,8 @@ namespace ResearchPal
 
             if (Prefs.DevMode)
             {
+                text.AppendLine();
+                text.AppendLine(Research.LabelCap + " Depth:" + Depth + ", Genus:" + Genus + ", Family:" + Family);
                 text.AppendLine();
                 text.Append("Position: " + this.Pos.ToString());
                 text.Append("Rect: " + this.Rect.ToString());

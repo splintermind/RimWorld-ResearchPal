@@ -292,7 +292,7 @@ namespace ResearchPal
             int rootYOffset = 0;
 
             foreach (Node root in roots)
-            {                
+            {
                 // recursively go through all children
                 // width at depths
                 Dictionary<int, int> widthAtDepth = new Dictionary<int, int>();
@@ -336,9 +336,9 @@ namespace ResearchPal
                 // try to position the root beside the top child if there isn't already a node there
                 if (root.Children.Any())
                 {
-                    Node topChild = root.Children.OrderBy(child => child.Pos.z).First();                    
+                    Node topChild = root.Children.OrderBy(child => child.Pos.z).First();
                     if (!Trees.Any(t => t.NodesAtDepth(root.Depth, true).Any(n => n.Pos.z == topChild.Pos.z)))
-                    {                                                
+                    {
                         bestPos = topChild.Pos.z;
                     }
                 }
@@ -376,6 +376,7 @@ namespace ResearchPal
             Orphans.MaxDepth = Math.Max(Orphans.MaxDepth, nodesPerRow - 1); // zero-based
         }
 
+        public static Settings.grpStrategyType CurrentStrategy;
         public static void Initialize()
         {
             // populate all nodes
@@ -403,6 +404,7 @@ namespace ResearchPal
             foreach (Node node in Forest)
             {
                 node.CreateLinks();
+                node.ConfigGrouping(); // after links
             }
 
             // calculate Depth of each node
@@ -428,13 +430,45 @@ namespace ResearchPal
                 }
             }
 
+
             // Assign the working dictionary to Tree objects, culling stumps.
-            Trees = trunks.Where(trunk => trunk.Value.Count >= Settings.MinTrunkSize)
+            if (Settings.GroupingStrategy == Settings.grpStrategyType.TABS_STRICT)
+            {
+                Trees = trunks.Where(trunk => trunk.Value.Count >= Settings.MinTrunkSize || trunk.Key != ResourceBank.String.DefaultResearchFamily)
                             .Select(trunk => new Tree(trunk.Key, trunk.Value))
                             .ToList();
+            } else {
+                Trees = trunks.Where(trunk => trunk.Value.Count >= Settings.MinTrunkSize)
+                            .Select(trunk => new Tree(trunk.Key, trunk.Value))
+                            .ToList();
+            }
+
+            Log.Message("trees.value.count >= minSize || trunk.Family != 'Main':");
+            foreach (Tree t in Trees)
+            {
+                t.ToString();
+            }
+
+            Log.Message("original orphans: ");
+            foreach (Node o in orphans)
+            {
+                o.Debug();
+            }
 
             // add too small Trees back into orphan list
-            orphans.AddRange(trunks.Where(trunk => trunk.Value.Count < Settings.MinTrunkSize).SelectMany(trunk => trunk.Value));
+            if (Settings.GroupingStrategy == Settings.grpStrategyType.TABS_STRICT)
+            {
+                orphans.AddRange(trunks.Where(trunk => trunk.Value.Count < Settings.MinTrunkSize && trunk.Key == ResourceBank.String.DefaultResearchFamily).SelectMany(trunk => trunk.Value));
+            } else
+            {
+                orphans.AddRange(trunks.Where(trunk => trunk.Value.Count < Settings.MinTrunkSize).SelectMany(trunk => trunk.Value));
+            }
+
+            Log.Message("orphans after culling trunks.value.count < minSize && Family='Main'");
+            foreach (Node o in orphans)
+            {
+                o.Debug();
+            }
 
             // The order in which Trees should appear; ideally we want Trees with lots of cross-references to appear together.
             OrderTrunks();
@@ -443,7 +477,16 @@ namespace ResearchPal
             Orphans = new Tree("orphans", new List<Node>()) { Color = Color.grey };
             foreach (Node orphan in orphans)
             {
-                Tree closest = orphan.ClosestTree() ?? Orphans;
+                Tree closest = null;
+                if (Settings.GroupingStrategy == Settings.grpStrategyType.TABS_STRICT && orphan.Genus != ResourceBank.String.DefaultResearchFamily)
+                {
+                    closest = Trees.First(t => t.Genus == orphan.Genus) ?? Orphans;
+                } else
+                {
+                    closest = orphan.ClosestTree() ?? Orphans;
+                }
+
+                Log.Message("adding " + orphan.ToString() + " to tree " + closest.ToString());
                 closest.AddLeaf(orphan);
             }
 
@@ -459,6 +502,7 @@ namespace ResearchPal
 
             // Done!
             Initialized = true;
+            CurrentStrategy = Settings.GroupingStrategy;
         }
 
         private static void OrderTrunks()

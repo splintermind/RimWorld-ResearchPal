@@ -36,6 +36,12 @@ namespace ResearchPal
         {
             base.PreOpen ();
 
+            if (ResearchTree.CurrentStrategy != Settings.GroupingStrategy)
+            {
+                ResearchTree.Initialized = false;
+                ResearchTree.Initialize();
+            }
+
             if (Settings.shouldPause) {
                 this.forcePause = Settings.shouldPause;
             }

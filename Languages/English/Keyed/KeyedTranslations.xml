@@ -30,6 +30,8 @@
   
   <FilterOpacityDesc>How opaque non-matching research should be. Default: {0}, Current: {1}</FilterOpacityDesc>
   
+  <DefaultResearchGroup>Main</DefaultResearchGroup>
+  
   <ResearchPal>ResearchPal</ResearchPal>
   <ResearchPal.ShowNotificationPopup>Show Notification Popup</ResearchPal.ShowNotificationPopup>
   <ResearchPal.ShowNotificationPopupTip>Whenever you finish research, pause and show the default notification.</ResearchPal.ShowNotificationPopupTip>
@@ -43,5 +45,10 @@
 
   <ResearchPal.DebugResearch>Debug Tools</ResearchPal.DebugResearch>
   <ResearchPal.DebugResearchTip>Whenever debug tools should be active (dev mode only).</ResearchPal.DebugResearchTip>
+  
+  <ResearchPal.GroupingDefault>Default (Combine Research)</ResearchPal.GroupingDefault>
+  <ResearchPal.GroupingTabStrict>Tabs Strict (Keep mod research trees separate)</ResearchPal.GroupingTabStrict>
+  <ResearchPal.GroupingTabRelaxed>Tabs Relaxed (Try to group by mod research when possible)</ResearchPal.GroupingTabRelaxed>
+  <ResearchPal.GroupingPrereq>Prerequisites (Group by the earliest prerequisite)</ResearchPal.GroupingPrereq>
 
 </LanguageData>
